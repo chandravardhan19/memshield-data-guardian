@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShellRouteImport } from './routes/_shell'
 import { Route as ShellDashboardRouteImport } from './routes/_shell.dashboard'
+import { Route as ShellDetectionRouteImport } from './routes/_shell.detection'
 import { Route as ShellProtectRouteImport } from './routes/_shell.protect'
 
 const IndexRoute = IndexRouteImport.update({
@@ -28,6 +29,11 @@ const ShellDashboardRoute = ShellDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => ShellRoute,
 } as any)
+const ShellDetectionRoute = ShellDetectionRouteImport.update({
+  id: '/detection',
+  path: '/detection',
+  getParentRoute: () => ShellRoute,
+} as any)
 const ShellProtectRoute = ShellProtectRouteImport.update({
   id: '/protect',
   path: '/protect',
@@ -37,11 +43,13 @@ const ShellProtectRoute = ShellProtectRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof ShellDashboardRoute
+  '/detection': typeof ShellDetectionRoute
   '/protect': typeof ShellProtectRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof ShellDashboardRoute
+  '/detection': typeof ShellDetectionRoute
   '/protect': typeof ShellProtectRoute
 }
 export interface FileRoutesById {
@@ -49,14 +57,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_shell': typeof ShellRouteWithChildren
   '/_shell/dashboard': typeof ShellDashboardRoute
+  '/_shell/detection': typeof ShellDetectionRoute
   '/_shell/protect': typeof ShellProtectRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/protect'
+  fullPaths: '/' | '/dashboard' | '/detection' | '/protect'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/protect'
-  id: '__root__' | '/' | '/_shell' | '/_shell/dashboard' | '/_shell/protect'
+  to: '/' | '/dashboard' | '/detection' | '/protect'
+  id:
+    | '__root__'
+    | '/'
+    | '/_shell'
+    | '/_shell/dashboard'
+    | '/_shell/detection'
+    | '/_shell/protect'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -87,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShellDashboardRouteImport
       parentRoute: typeof ShellRoute
     }
+    '/_shell/detection': {
+      id: '/_shell/detection'
+      path: '/detection'
+      fullPath: '/detection'
+      preLoaderRoute: typeof ShellDetectionRouteImport
+      parentRoute: typeof ShellRoute
+    }
     '/_shell/protect': {
       id: '/_shell/protect'
       path: '/protect'
@@ -99,11 +121,13 @@ declare module '@tanstack/react-router' {
 
 interface ShellRouteChildren {
   ShellDashboardRoute: typeof ShellDashboardRoute
+  ShellDetectionRoute: typeof ShellDetectionRoute
   ShellProtectRoute: typeof ShellProtectRoute
 }
 
 const ShellRouteChildren: ShellRouteChildren = {
   ShellDashboardRoute: ShellDashboardRoute,
+  ShellDetectionRoute: ShellDetectionRoute,
   ShellProtectRoute: ShellProtectRoute,
 }
 

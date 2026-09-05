@@ -47,7 +47,6 @@ function Arrow() {
   return <span className="text-primary">↓</span>;
 }
 
-export default Architecture;
 
 function Architecture() {
   return (

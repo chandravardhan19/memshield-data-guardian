@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShellRouteImport } from './routes/_shell'
+import { Route as ShellAuditRouteImport } from './routes/_shell.audit'
 import { Route as ShellDashboardRouteImport } from './routes/_shell.dashboard'
 import { Route as ShellDetectionRouteImport } from './routes/_shell.detection'
 import { Route as ShellOutputRouteImport } from './routes/_shell.output'
@@ -25,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const ShellRoute = ShellRouteImport.update({
   id: '/_shell',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ShellAuditRoute = ShellAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => ShellRoute,
 } as any)
 const ShellDashboardRoute = ShellDashboardRouteImport.update({
   id: '/dashboard',
@@ -54,6 +60,7 @@ const ShellProtectRoute = ShellProtectRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/audit': typeof ShellAuditRoute
   '/dashboard': typeof ShellDashboardRoute
   '/detection': typeof ShellDetectionRoute
   '/output': typeof ShellOutputRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/audit': typeof ShellAuditRoute
   '/dashboard': typeof ShellDashboardRoute
   '/detection': typeof ShellDetectionRoute
   '/output': typeof ShellOutputRoute
@@ -72,6 +80,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_shell': typeof ShellRouteWithChildren
+  '/_shell/audit': typeof ShellAuditRoute
   '/_shell/dashboard': typeof ShellDashboardRoute
   '/_shell/detection': typeof ShellDetectionRoute
   '/_shell/output': typeof ShellOutputRoute
@@ -81,13 +90,27 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/dashboard' | '/detection' | '/output' | '/policy' | '/protect'
+    | '/'
+    | '/audit'
+    | '/dashboard'
+    | '/detection'
+    | '/output'
+    | '/policy'
+    | '/protect'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/detection' | '/output' | '/policy' | '/protect'
+  to:
+    | '/'
+    | '/audit'
+    | '/dashboard'
+    | '/detection'
+    | '/output'
+    | '/policy'
+    | '/protect'
   id:
     | '__root__'
     | '/'
     | '/_shell'
+    | '/_shell/audit'
     | '/_shell/dashboard'
     | '/_shell/detection'
     | '/_shell/output'
@@ -115,6 +138,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof ShellRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_shell/audit': {
+      id: '/_shell/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof ShellAuditRouteImport
+      parentRoute: typeof ShellRoute
     }
     '/_shell/dashboard': {
       id: '/_shell/dashboard'
@@ -155,6 +185,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface ShellRouteChildren {
+  ShellAuditRoute: typeof ShellAuditRoute
   ShellDashboardRoute: typeof ShellDashboardRoute
   ShellDetectionRoute: typeof ShellDetectionRoute
   ShellOutputRoute: typeof ShellOutputRoute
@@ -163,6 +194,7 @@ interface ShellRouteChildren {
 }
 
 const ShellRouteChildren: ShellRouteChildren = {
+  ShellAuditRoute: ShellAuditRoute,
   ShellDashboardRoute: ShellDashboardRoute,
   ShellDetectionRoute: ShellDetectionRoute,
   ShellOutputRoute: ShellOutputRoute,

@@ -121,7 +121,7 @@ function ProtectedOutput() {
       <GlassCard className="p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">
-            {dest.icon} {dest.name.toUpperCase()} SYSTEM RECEIVES
+            {dest.icon} {dest.name.toUpperCase()} RECEIVES
           </h2>
           <span className="font-mono text-[11px] text-muted-foreground">
             destination = {input.destination}

@@ -25,7 +25,7 @@ const nav = [
   { to: "/architecture", label: "Architecture", icon: Boxes },
 ] as const;
 
-function NavList({ onNavigate }: { onNavigate?: () => void }) {
+function NavList({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   return (
     <nav className="flex flex-1 flex-col gap-1">
       {nav.map(({ to, label, icon: Icon }) => (
@@ -46,7 +46,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   return (
     <div className="flex h-full flex-col gap-6 p-4">
       <Link to="/" className="flex items-center gap-2.5 px-1" onClick={onNavigate}>

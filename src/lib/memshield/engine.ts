@@ -11,7 +11,7 @@ export type DemoInput = {
 };
 
 export const defaultInput: DemoInput = {
-  fullName: "Demo User",
+  fullName: "Customer A",
   email: "demo@example.com",
   phone: "9876543210",
   account: "1234567890",
@@ -22,11 +22,11 @@ export const defaultInput: DemoInput = {
 
 export type Detection = {
   key: keyof Omit<DemoInput, "destination">;
-  icon: string;
   dataType: string;
   value: string;
   category: string;
   level: PrivacyLevel;
+  maskedPreview: string;
   action: ProtectionAction;
   protectedValue: string;
   reason: string;
@@ -51,8 +51,8 @@ const actionByDestination: Record<
     bank: { action: "ALLOW", reason: "The bank is the record owner and already knows the name." },
     ai: { action: "PSEUDONYMIZE", reason: "The AI system only needs a stable alias, not identity." },
     analytics: {
-      action: "PSEUDONYMIZE",
-      reason: "Analytics aggregates behaviour, so identity is replaced with an alias.",
+      action: "ANONYMIZE",
+      reason: "Analytics aggregates behaviour, so personal identity is removed.",
     },
   },
   email: {
@@ -109,12 +109,11 @@ function protectValue(
 }
 
 export function analyze(input: DemoInput): Detection[] {
-  const rows: Omit<Detection, "action" | "protectedValue" | "reason">[] = [];
+  const rows: Omit<Detection, "action" | "protectedValue" | "reason" | "maskedPreview">[] = [];
 
   if (input.fullName.trim())
     rows.push({
       key: "fullName",
-      icon: "🧑",
       dataType: "Full Name",
       value: input.fullName,
       category: "Personal Information",
@@ -123,7 +122,6 @@ export function analyze(input: DemoInput): Detection[] {
   if (input.email.trim())
     rows.push({
       key: "email",
-      icon: "✉️",
       dataType: "Email",
       value: input.email,
       category: "Personal Information",
@@ -132,7 +130,6 @@ export function analyze(input: DemoInput): Detection[] {
   if (input.phone.trim())
     rows.push({
       key: "phone",
-      icon: "📞",
       dataType: "Phone Number",
       value: input.phone,
       category: "Personal Information",
@@ -141,7 +138,6 @@ export function analyze(input: DemoInput): Detection[] {
   if (input.account.trim())
     rows.push({
       key: "account",
-      icon: "🏦",
       dataType: "Account Number",
       value: input.account,
       category: "Financial Information",
@@ -150,7 +146,6 @@ export function analyze(input: DemoInput): Detection[] {
   if (input.amount.trim())
     rows.push({
       key: "amount",
-      icon: "💸",
       dataType: "Transaction Amount",
       value: `₹${Number(input.amount || 0).toLocaleString("en-IN")}`,
       category: "Low Sensitivity",
@@ -172,6 +167,12 @@ export function analyze(input: DemoInput): Detection[] {
     };
     return {
       ...row,
+      maskedPreview:
+        row.key === "email"
+          ? maskEmail(row.value)
+          : row.key === "amount"
+            ? row.value
+            : maskTail(row.value),
       action: policy.action,
       reason: policy.reason,
       protectedValue: protectValue(

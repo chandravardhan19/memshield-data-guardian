@@ -17,77 +17,93 @@ export const Route = createFileRoute("/_shell/audit")({
       {
         name: "description",
         content:
-          "Track MemShield protection decisions and security events with filters for protected, blocked and critical activity.",
+          "Track MemShield protection decisions with filters by destination and status. Original sensitive values are never stored.",
       },
       { property: "og:title", content: "Security Audit Logs — MemShield" },
       {
         property: "og:description",
         content: "Track MemShield protection decisions and security events.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AuditLogsPage,
 });
 
-const filters = [
-  "All Events",
-  "Protected",
-  "Blocked",
-  "Critical",
-  "AI",
-  "Bank",
-  "Analytics",
-] as const;
+const destinationFilters = ["All Destinations", "Bank", "AI", "Analytics"] as const;
+const statusFilters = ["All Statuses", "SUCCESS", "BLOCKED", "FAILED"] as const;
+
+function FilterRow<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: readonly T[];
+  value: T;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="font-mono text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
+        {label}
+      </span>
+      {options.map((o) => (
+        <button
+          key={o}
+          onClick={() => onChange(o)}
+          aria-pressed={value === o}
+          className={cn(
+            "rounded-full border px-4 py-2 text-xs font-medium transition-colors",
+            value === o
+              ? "border-primary/50 bg-primary/12 text-primary"
+              : "border-border bg-surface-2/50 text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {o}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function AuditLogsPage() {
-  const [filter, setFilter] = useState<(typeof filters)[number]>("All Events");
+  const [destination, setDestination] =
+    useState<(typeof destinationFilters)[number]>("All Destinations");
+  const [status, setStatus] = useState<(typeof statusFilters)[number]>("All Statuses");
 
-  const rows = auditLogs.filter((e) => {
-    switch (filter) {
-      case "All Events":
-        return true;
-      case "Protected":
-        return e.status === "SUCCESS" && e.action !== "ALLOW";
-      case "Blocked":
-        return e.action === "BLOCK";
-      case "Critical":
-        return e.status === "CRITICAL";
-      default:
-        return e.destination === filter;
-    }
-  });
+  const rows = auditLogs.filter(
+    (e) =>
+      (destination === "All Destinations" || e.destination === destination) &&
+      (status === "All Statuses" || e.status === status),
+  );
 
   return (
     <>
       <PageHeader
-        title="Security Audit Logs"
-        subtitle="Track MemShield protection decisions and security events."
+        title="Audit Logs"
+        subtitle="Every MemShield decision is recorded. Original sensitive values are never stored."
       />
 
-      <div className="flex flex-wrap gap-2">
-        {filters.map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            aria-pressed={filter === f}
-            className={cn(
-              "rounded-full border px-4 py-2 text-xs font-medium transition-colors",
-              filter === f
-                ? "border-primary/50 bg-primary/12 text-primary"
-                : "border-border bg-surface-2/50 text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {f}
-          </button>
-        ))}
+      <div className="space-y-3">
+        <FilterRow
+          label="Destination"
+          options={destinationFilters}
+          value={destination}
+          onChange={setDestination}
+        />
+        <FilterRow label="Status" options={statusFilters} value={status} onChange={setStatus} />
       </div>
 
       <GlassCard className="p-4 sm:p-6">
         <div className="-mx-2 overflow-x-auto px-2">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[820px] text-sm">
             <thead>
               <tr className="border-b border-border text-left font-mono text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
                 <th className="py-3 pr-3">Timestamp</th>
+                <th className="py-3 pr-3">Request ID</th>
                 <th className="py-3 pr-3">Data Type</th>
                 <th className="py-3 pr-3">Privacy Level</th>
                 <th className="py-3 pr-3">Destination</th>
@@ -102,6 +118,7 @@ function AuditLogsPage() {
                   className="border-b border-border/60 transition-colors last:border-0 hover:bg-surface-2/60"
                 >
                   <td className="py-3 pr-3 font-mono text-xs text-muted-foreground">{e.time}</td>
+                  <td className="py-3 pr-3 font-mono text-xs text-primary">{e.requestId}</td>
                   <td className="py-3 pr-3 font-medium">{e.dataType}</td>
                   <td className="py-3 pr-3">
                     <PrivacyBadge level={e.level} withLabel={false} />
@@ -117,7 +134,7 @@ function AuditLogsPage() {
               ))}
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                  <td colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
                     No events match this filter.
                   </td>
                 </tr>
@@ -126,6 +143,11 @@ function AuditLogsPage() {
           </table>
         </div>
       </GlassCard>
+
+      <p className="text-xs text-muted-foreground">
+        Note: audit records store only the data type, privacy level, destination and action. No
+        original sensitive value is written to the log.
+      </p>
     </>
   );
 }

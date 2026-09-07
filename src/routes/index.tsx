@@ -3,6 +3,7 @@ import { Navbar } from "@/components/memshield/Navbar";
 import { FlowStrip, GlassCard, SectionTitle, VerticalFlow } from "@/components/memshield/primitives";
 import { Button } from "@/components/ui/button";
 import { features, pipelineSteps, privacyLevels } from "@/lib/memshield/mock-data";
+import { techStack } from "@/lib/memshield/mock-data";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -83,7 +84,7 @@ function LandingPage() {
               />
             </div>
             <div className="mt-6 grid grid-cols-3 gap-2">
-              {["🏦 Bank", "🤖 AI", "📊 Analytics"].map((d) => (
+              {["Bank", "AI", "Analytics"].map((d) => (
                 <div
                   key={d}
                   className="rounded-xl border border-border bg-surface-2/70 px-2 py-3 text-center text-xs"
@@ -100,7 +101,7 @@ function LandingPage() {
       <section className="mx-auto max-w-7xl space-y-8 px-4 py-16 sm:px-6">
         <SectionTitle
           eyebrow="Capabilities"
-          title="Five layers between your users and your destinations"
+          title="Six modules between your users and your destinations"
           subtitle="Every request passes through the same deterministic privacy pipeline."
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -109,8 +110,7 @@ function LandingPage() {
               key={f.title}
               className="p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40"
             >
-              <span className="text-2xl">{f.icon}</span>
-              <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
+              <h3 className=" text-lg font-semibold">{f.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{f.description}</p>
             </GlassCard>
           ))}
@@ -137,6 +137,32 @@ function LandingPage() {
             subtitle="MemShield never lets unprotected sensitive data reach an untrusted destination."
           />
           <FlowStrip steps={pipelineSteps} />
+        </div>
+      </section>
+
+      {/* Technology stack */}
+      <section className="mx-auto max-w-7xl space-y-8 px-4 py-16 sm:px-6">
+        <SectionTitle
+          eyebrow="Technology"
+          title="Built with a focused, production-style stack"
+          subtitle="React, TypeScript and Tailwind CSS on the front, Python and FastAPI on the back, PostgreSQL for audit storage."
+        />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {techStack.map((g) => (
+            <GlassCard key={g.group} className="p-6">
+              <p className="font-mono text-[11px] tracking-[0.18em] text-primary uppercase">
+                {g.group}
+              </p>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                {g.items.map((i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-primary" />
+                    {i}
+                  </li>
+                ))}
+              </ul>
+            </GlassCard>
+          ))}
         </div>
       </section>
 

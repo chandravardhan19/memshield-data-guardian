@@ -8,7 +8,7 @@ export type ProtectionAction =
   | "ENCRYPT"
   | "BLOCK"
   | "ALLOW";
-export type EventStatus = "SUCCESS" | "WARNING" | "CRITICAL";
+export type EventStatus = "SUCCESS" | "BLOCKED" | "FAILED";
 
 export const privacyLevels: Record<
   PrivacyLevel,
@@ -22,32 +22,109 @@ export const privacyLevels: Record<
 
 export const destinations: {
   id: DestinationId;
-  icon: string;
   name: string;
   description: string;
+  protection: string;
 }[] = [
-  { id: "bank", icon: "🏦", name: "Bank", description: "Simulated banking backend" },
-  { id: "ai", icon: "🤖", name: "AI System", description: "Privacy-safe AI processing" },
-  { id: "analytics", icon: "📊", name: "Analytics", description: "Anonymous data analytics" },
+  {
+    id: "bank",
+    name: "Bank",
+    description: "Trusted demo banking backend",
+    protection: "Tokenization / secure processing",
+  },
+  {
+    id: "ai",
+    name: "AI",
+    description: "Sensitive data will be masked before processing",
+    protection: "Masking",
+  },
+  {
+    id: "analytics",
+    name: "Analytics",
+    description: "Personal identity will be anonymized",
+    protection: "Anonymization",
+  },
+];
+
+export const destinationRoutes: { id: DestinationId; title: string; steps: string[] }[] = [
+  {
+    id: "bank",
+    title: "Bank Route",
+    steps: ["MemShield", "Tokenize / Secure Processing", "Demo Bank Backend", "Transaction Response"],
+  },
+  {
+    id: "ai",
+    title: "AI Route",
+    steps: ["MemShield", "Mask Sensitive Data", "AI Processing", "Safe Response"],
+  },
+  {
+    id: "analytics",
+    title: "Analytics Route",
+    steps: [
+      "MemShield",
+      "Anonymize Personal Data",
+      "Analytics Database",
+      "Reports and Statistics",
+    ],
+  },
 ];
 
 export const protectionActions: {
   action: ProtectionAction;
-  icon: string;
   label: string;
   description: string;
 }[] = [
-  { action: "MASK", icon: "🥸", label: "Masked", description: "Partial characters hidden" },
+  { action: "MASK", label: "Masked", description: "Partial characters hidden" },
   {
     action: "PSEUDONYMIZE",
-    icon: "🎭",
     label: "Pseudonymized",
     description: "Replaced with a stable alias",
   },
-  { action: "TOKENIZE", icon: "🎫", label: "Tokenized", description: "Swapped for a vault token" },
-  { action: "ANONYMIZE", icon: "🫥", label: "Anonymized", description: "Identity fully removed" },
-  { action: "ENCRYPT", icon: "🔐", label: "Encrypted", description: "Sealed in transit at rest" },
-  { action: "BLOCK", icon: "🚫", label: "Blocked", description: "Never leaves MemShield" },
+  { action: "TOKENIZE", label: "Tokenized", description: "Swapped for a vault token" },
+  { action: "ANONYMIZE", label: "Anonymized", description: "Identity fully removed" },
+  { action: "ENCRYPT", label: "Encrypted", description: "Sealed in transit and at rest" },
+  { action: "BLOCK", label: "Blocked", description: "Never leaves MemShield" },
+];
+
+export const protectionExamples: {
+  method: string;
+  original: string;
+  protected: string;
+  note: string;
+}[] = [
+  {
+    method: "Masking",
+    original: "1234567890",
+    protected: "******7890",
+    note: "Keeps the format, hides the value.",
+  },
+  {
+    method: "Tokenization",
+    original: "1234567890",
+    protected: "TOKEN_ACC_001",
+    note: "Reversible only inside the bank vault.",
+  },
+  {
+    method: "Anonymization",
+    original: "Customer A",
+    protected: "USER_001",
+    note: "Identity is permanently removed.",
+  },
+  {
+    method: "Blocking",
+    original: "OTP / PIN / Password / CVV",
+    protected: "BLOCKED",
+    note: "Critical data never leaves MemShield.",
+  },
+];
+
+export const classificationExamples: { dataType: string; level: PrivacyLevel }[] = [
+  { dataType: "Email", level: "PL2" },
+  { dataType: "Phone Number", level: "PL2" },
+  { dataType: "Customer Name", level: "PL2" },
+  { dataType: "Account Number", level: "PL3" },
+  { dataType: "Transaction Information", level: "PL3" },
+  { dataType: "OTP / PIN / Password", level: "PL4" },
 ];
 
 export const policyRules: {
@@ -62,24 +139,36 @@ export const policyRules: {
   { dataType: "Email", level: "PL2", destination: "AI", action: "MASK" },
   { dataType: "Email", level: "PL2", destination: "Analytics", action: "ANONYMIZE" },
   { dataType: "Phone Number", level: "PL2", destination: "AI", action: "MASK" },
-  { dataType: "Full Name", level: "PL2", destination: "Analytics", action: "PSEUDONYMIZE" },
+  { dataType: "Personal Data", level: "PL2", destination: "Analytics", action: "ANONYMIZE" },
   { dataType: "Transaction Amount", level: "PL1", destination: "Analytics", action: "ALLOW" },
-  { dataType: "OTP", level: "PL4", destination: "AI", action: "BLOCK" },
-  { dataType: "PIN", level: "PL4", destination: "Analytics", action: "BLOCK" },
+  { dataType: "OTP / PIN", level: "PL4", destination: "AI", action: "BLOCK" },
+  { dataType: "OTP / PIN", level: "PL4", destination: "Analytics", action: "BLOCK" },
 ];
 
 export const dashboardStats = [
-  { label: "Total Requests", value: 50, delta: "+12 today", tone: "primary" as const },
-  { label: "Protected", value: 42, delta: "84% of traffic", tone: "success" as const },
-  { label: "Blocked", value: 6, delta: "PL4 attempts", tone: "danger" as const },
-  { label: "Allowed", value: 2, delta: "Non-sensitive", tone: "warning" as const },
+  {
+    label: "Total Requests Processed",
+    value: 50,
+    delta: "+12 today",
+    tone: "primary" as const,
+  },
+  {
+    label: "Sensitive Data Detected",
+    value: 138,
+    delta: "Across 50 requests",
+    tone: "warning" as const,
+  },
+  { label: "Data Protected", value: 132, delta: "6 blocked at PL4", tone: "success" as const },
+  { label: "Audit Logs Generated", value: 50, delta: "One per request", tone: "primary" as const },
 ];
 
 export const systemStatus = [
-  { name: "MemShield Engine", status: "ACTIVE", uptime: "99.98%" },
+  { name: "Sensitive Data Detector", status: "ACTIVE", uptime: "99.98%" },
+  { name: "Privacy Classifier", status: "ACTIVE", uptime: "99.97%" },
   { name: "Policy Engine", status: "ACTIVE", uptime: "99.96%" },
-  { name: "Data Protection", status: "ACTIVE", uptime: "100%" },
-  { name: "Audit System", status: "ACTIVE", uptime: "99.99%" },
+  { name: "Protection Engine", status: "ACTIVE", uptime: "100%" },
+  { name: "Destination Router", status: "ACTIVE", uptime: "99.95%" },
+  { name: "Audit Logger", status: "ACTIVE", uptime: "99.99%" },
 ];
 
 export const privacyDistribution: { level: PrivacyLevel; name: string; count: number }[] = [
@@ -91,6 +180,7 @@ export const privacyDistribution: { level: PrivacyLevel; name: string; count: nu
 
 export type AuditEntry = {
   id: string;
+  requestId: string;
   time: string;
   dataType: string;
   level: PrivacyLevel;
@@ -102,6 +192,7 @@ export type AuditEntry = {
 export const auditLogs: AuditEntry[] = [
   {
     id: "evt-1041",
+    requestId: "REQ-001",
     time: "10:30 AM",
     dataType: "Account Number",
     level: "PL3",
@@ -111,15 +202,17 @@ export const auditLogs: AuditEntry[] = [
   },
   {
     id: "evt-1040",
+    requestId: "REQ-002",
     time: "10:28 AM",
     dataType: "OTP",
     level: "PL4",
     destination: "AI",
     action: "BLOCK",
-    status: "CRITICAL",
+    status: "BLOCKED",
   },
   {
     id: "evt-1039",
+    requestId: "REQ-003",
     time: "10:20 AM",
     dataType: "Email",
     level: "PL2",
@@ -129,6 +222,7 @@ export const auditLogs: AuditEntry[] = [
   },
   {
     id: "evt-1038",
+    requestId: "REQ-004",
     time: "10:15 AM",
     dataType: "Account Number",
     level: "PL3",
@@ -138,6 +232,7 @@ export const auditLogs: AuditEntry[] = [
   },
   {
     id: "evt-1037",
+    requestId: "REQ-005",
     time: "10:04 AM",
     dataType: "Phone Number",
     level: "PL2",
@@ -147,107 +242,133 @@ export const auditLogs: AuditEntry[] = [
   },
   {
     id: "evt-1036",
+    requestId: "REQ-006",
     time: "09:52 AM",
     dataType: "PIN",
     level: "PL4",
     destination: "Analytics",
     action: "BLOCK",
-    status: "CRITICAL",
+    status: "BLOCKED",
   },
   {
     id: "evt-1035",
+    requestId: "REQ-007",
     time: "09:41 AM",
-    dataType: "Full Name",
+    dataType: "Customer Name",
     level: "PL2",
     destination: "Analytics",
-    action: "PSEUDONYMIZE",
+    action: "ANONYMIZE",
     status: "SUCCESS",
   },
   {
     id: "evt-1034",
+    requestId: "REQ-008",
     time: "09:30 AM",
     dataType: "Transaction Amount",
     level: "PL1",
     destination: "Bank",
     action: "ALLOW",
-    status: "WARNING",
+    status: "SUCCESS",
+  },
+  {
+    id: "evt-1033",
+    requestId: "REQ-009",
+    time: "09:18 AM",
+    dataType: "Account Number",
+    level: "PL3",
+    destination: "Analytics",
+    action: "ANONYMIZE",
+    status: "FAILED",
   },
 ];
 
 export const recentActivity = auditLogs.slice(0, 4);
 
-export const architectureComponents = [
+export const memshieldModules = [
   {
     step: "01",
-    icon: "📥",
-    title: "Data Interceptor",
-    description: "Receives user data for privacy processing before it leaves the application.",
+    title: "Sensitive Data Detector",
+    description:
+      "Python regex and pattern matching identify personal and financial values in fields and free text.",
   },
   {
     step: "02",
-    icon: "🔍",
-    title: "Sensitive Data Detector",
-    description: "Identifies personal and financial information inside structured and free text.",
-  },
-  {
-    step: "03",
-    icon: "🏷️",
     title: "Privacy Classifier",
     description: "Assigns PL1, PL2, PL3 or PL4 to every detected entity.",
   },
   {
-    step: "04",
-    icon: "🧠",
+    step: "03",
     title: "Policy Engine",
-    description: "Determines the appropriate protection action for data type + level + destination.",
+    description: "Maps data type, privacy level and destination to a protection decision.",
+  },
+  {
+    step: "04",
+    title: "Protection Engine",
+    description: "Applies masking, tokenization, anonymization or blocking.",
   },
   {
     step: "05",
-    icon: "🔐",
-    title: "Protection Engine",
-    description: "Applies masking, tokenization, anonymization, encryption or blocking.",
+    title: "Destination Router",
+    description: "Delivers the protected payload to the selected destination only.",
   },
   {
     step: "06",
-    icon: "🚦",
-    title: "Destination Router",
-    description: "Routes the protected payload to the selected destination only.",
+    title: "Audit Logger",
+    description: "Records every decision in PostgreSQL without storing original values.",
   },
 ];
 
+export const architectureComponents = memshieldModules;
+
 export const pipelineSteps = [
-  { icon: "⌨️", title: "Enter Data", description: "User submits a request" },
-  { icon: "🔍", title: "Detect", description: "Sensitive entities found" },
-  { icon: "🏷️", title: "Classify", description: "Privacy level assigned" },
-  { icon: "🧠", title: "Policy", description: "Action decided" },
-  { icon: "🔐", title: "Protect", description: "Transformation applied" },
-  { icon: "🚦", title: "Route", description: "Delivered safely" },
+  { title: "Detect", description: "Sensitive entities found" },
+  { title: "Classify", description: "Privacy level assigned" },
+  { title: "Decide", description: "Policy action selected" },
+  { title: "Protect", description: "Transformation applied" },
+  { title: "Route", description: "Sent to destination" },
+  { title: "Log", description: "Audit entry written" },
+];
+
+export const processingSteps = [
+  { title: "Receive Data", description: "Request accepted by the FastAPI backend" },
+  { title: "Detect Sensitive Information", description: "Regex and pattern matching" },
+  { title: "Classify Privacy Level", description: "PL1 to PL4 assigned" },
+  { title: "Check Policy", description: "Destination rules evaluated" },
+  { title: "Apply Protection", description: "Mask, tokenize, anonymize or block" },
+  { title: "Route to Destination", description: "Bank, AI or Analytics" },
+  { title: "Generate Audit Log", description: "Stored in PostgreSQL" },
+];
+
+export const techStack: { group: string; items: string[] }[] = [
+  { group: "Frontend", items: ["React.js", "TypeScript", "Tailwind CSS"] },
+  { group: "Backend", items: ["Python", "FastAPI"] },
+  { group: "Database", items: ["PostgreSQL"] },
+  { group: "Development", items: ["VS Code", "Git", "GitHub", "Postman", "pgAdmin"] },
 ];
 
 export const features = [
   {
-    icon: "🔍",
     title: "Sensitive Data Detection",
-    description: "Automatically identifies sensitive information across fields and free text.",
+    description: "Identifies sensitive information across form fields and free text.",
   },
   {
-    icon: "🏷️",
     title: "Privacy Classification",
     description: "Classifies every entity by sensitivity from PL1 through PL4.",
   },
   {
-    icon: "🧠",
-    title: "Smart Policy Engine",
+    title: "Policy Engine",
     description: "Decides the correct protection method for each destination.",
   },
   {
-    icon: "🔐",
-    title: "Data Protection",
-    description: "Masking, tokenization, pseudonymization, anonymization and blocking.",
+    title: "Protection Engine",
+    description: "Masking, tokenization, anonymization and blocking.",
   },
   {
-    icon: "🚦",
-    title: "Secure Routing",
-    description: "Routes protected data to the appropriate destination only.",
+    title: "Destination Router",
+    description: "Routes protected data to the selected destination only.",
+  },
+  {
+    title: "Audit Logger",
+    description: "Records every protection decision without original values.",
   },
 ];
